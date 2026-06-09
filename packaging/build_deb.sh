@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs INSIDE the ros:noetic packaging container. Installs prebuilt PAIRS
 # dependency .debs from /prebuilt, then builds pairs_rviz_plugins and copies the .deb to /output.
-#   PAIRS deps (build order, supplied from /prebuilt): pairs_msgs pairs_lib
+#   PAIRS deps (build order, supplied from /prebuilt): none
 set -eo pipefail
 ROS_DISTRO_NAME="noetic"; OS_NAME="ubuntu"; OS_VERSION="focal"
 source "/opt/ros/${ROS_DISTRO_NAME}/setup.bash"

@@ -21,9 +21,15 @@ pairs_uav_autostart:
   ubuntu: [ros-noetic-pairs-uav-autostart]
 pairs_uav_status:
   ubuntu: [ros-noetic-pairs-uav-status]
+pairs_multirotor_simulator:
+  ubuntu: [ros-noetic-pairs-multirotor-simulator]
+pairs_rviz_plugins:
+  ubuntu: [ros-noetic-pairs-rviz-plugins]
+pairs_uav_core:
+  ubuntu: [ros-noetic-pairs-uav-core]
 pairs_uav_testing:
   ubuntu: [ros-noetic-pairs-uav-testing]
 pairs_uav_gazebo_simulation:
   ubuntu: [ros-noetic-pairs-uav-gazebo-simulation]
 nlopt:
-  ubuntu: [libnlopt-cxx-dev]
+  ubuntu: [ros-noetic-nlopt]
