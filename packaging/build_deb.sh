@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Runs INSIDE the ros:noetic packaging container. Installs prebuilt PAIRS
+# Runs INSIDE the ros:jazzy packaging container. Installs prebuilt PAIRS
 # dependency .debs from /prebuilt, then builds pairs_rviz_plugins and copies the .deb to /output.
 #   PAIRS deps (build order, supplied from /prebuilt): pairs_msgs pairs_lib
 set -eo pipefail
-ROS_DISTRO_NAME="noetic"; OS_NAME="ubuntu"; OS_VERSION="focal"
+ROS_DISTRO_NAME="jazzy"; OS_NAME="ubuntu"; OS_VERSION="noble"
 source "/opt/ros/${ROS_DISTRO_NAME}/setup.bash"
 set -u
 
 LOCAL_RULES="/src/pairs_rviz_plugins/packaging/rosdep/pairs.yaml"
 echo "yaml file://${LOCAL_RULES}" | sudo tee /etc/ros/rosdep/sources.list.d/10-pairs.list >/dev/null
-rosdep update --include-eol-distros
+rosdep update
 sudo apt-get update
 mkdir -p /output
 

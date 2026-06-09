@@ -1,326 +1,197 @@
 cmake_minimum_required(VERSION 3.5)
 project(pairs_rviz_plugins)
 
-set(CATKIN_DEPENDENCIES
-  cmake_modules
-  geometry_msgs
-  pairs_lib
-  pairs_msgs
-  nav_msgs
-  nodelet
-  pluginlib
-  roscpp
-  rviz
-  )
+# set the correct standards
+set(CMAKE_C_STANDARD 99)
+# can not use C++17 or higher because of OGRE
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(catkin REQUIRED COMPONENTS
-  ${CATKIN_DEPENDENCIES}
-  )
-
-set(CMAKE_AUTOMOC ON)
-
-if(rviz_QT_VERSION VERSION_LESS "5")
-  message(STATUS "Using Qt4 based on the rviz_QT_VERSION: ${rviz_QT_VERSION}")
-  find_package(Qt4 ${rviz_QT_VERSION} EXACT REQUIRED QtCore QtGui)
-  ## pull in all required include dirs, define QT_LIBRARIES, etc.
-  include(${QT_USE_FILE})
-else()
-  message(STATUS "Using Qt5 based on the rviz_QT_VERSION: ${rviz_QT_VERSION}")
-  find_package(Qt5 ${rviz_QT_VERSION} EXACT REQUIRED Core Widgets)
-  ## make target_link_libraries(${QT_LIBRARIES}) pull in all required dependencies
-  set(QT_LIBRARIES Qt5::Widgets)
+# set the compile options to show code warnings
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(DEPENDENCIES
+  pluginlib
+  rviz_common 
+  rviz_ogre_vendor
+  pairs_msgs
 
-link_directories(${catkin_LIBRARY_DIRS})
+  # for TexturedMeshDisplay
+  pcl_msgs
+  image_transport
+  cv_bridge
+  pcl_conversions
+  rclcpp
+  message_filters
+  sensor_msgs
+  std_msgs
+  )
 
+foreach(DEP IN LISTS DEPENDENCIES)
+  find_package(${DEP} REQUIRED)
+endforeach()
+
+find_package(Qt5 REQUIRED Core Widgets)
+set(QT_LIBRARIES Qt5::Widgets)
 add_definitions(-DQT_NO_KEYWORDS)
 
-# ignore c++17 deprecation warnings for the register storage class specifier because of OGRE
-add_definitions("-Wno-register")
+# for TexturedMeshDisplay
+find_package(OpenCV REQUIRED)
+find_package(PkgConfig REQUIRED)
+
+set(REQUIRED_OGRE_VERSION "1.12")
+if(OGRE_VERSION)
+    message(STATUS "Found OGRE version: ${OGRE_VERSION}")
+    if(OGRE_VERSION VERSION_LESS ${REQUIRED_OGRE_VERSION})
+        message(FATAL_ERROR "OGRE version ${OGRE_VERSION} found, but version ${REQUIRED_OGRE_VERSION} or higher is required")
+    endif()
+else()
+    message(WARNING "OGRE version could not be determined")
+endif()
+
+# VERY IMPORTANT
+# pre-compliation of the headers by QT to generate Q_SLOTS
+set(CMAKE_AUTOMOC ON)
+qt5_wrap_cpp(MOC_FILES
+  include/pairs_rviz_plugins/sphere/display.h
+  include/pairs_rviz_plugins/sphere/visual.h
+)
+
+qt5_wrap_cpp(MOC_FILES_TEXTURED_MESH
+  include/pairs_rviz_plugins/textured_mesh_display/textured_mesh_display.hpp
+)
 
 set(LIBRARIES
-  PairsRvizPlugins_Bumper
-  PairsRvizPlugins_Covariance
-  PairsRvizPlugins_FastArrow
-  PairsRvizPlugins_SmartLine
-  PairsRvizPlugins_NavGoal
-  PairsRvizPlugins_PoseEstimate
+  # PairsRvizPlugins_Bumper
+  # PairsRvizPlugins_Covariance
+  # PairsRvizPlugins_FastArrow
+  # PairsRvizPlugins_SmartLine
+  # PairsRvizPlugins_NavGoal
+  # PairsRvizPlugins_PoseEstimate
   PairsRvizPlugins_Sphere
-  PairsRvizPlugins_PoseWithCovarianceArray
-  PairsRvizPlugins_TrackArray
-  PairsRvizPlugins_NamedGoalTool
-  PairsRvizPlugins_OdomViz
-  PairsRvizPlugins_WaypointPlanner
-  PairsRvizPlugins_Status
+  # PairsRvizPlugins_PoseWithCovarianceArray
+  # PairsRvizPlugins_TrackArray
+  # PairsRvizPlugins_NamedGoalTool
+  # PairsRvizPlugins_OdomViz
+  # PairsRvizPlugins_WaypointPlanner
+  # PairsRvizPlugins_Status
+  PairsRvizPlugins_TexturedMeshDisplay
   )
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${LIBRARIES}
-  CATKIN_DEPENDS ${CATKIN_DEPENDENCIES}
-  )
-
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-  )
-
-## BUMPER VIZUALIZATION
-
-add_library(PairsRvizPlugins_Bumper
-  include/bumper/display.h
-  include/bumper/visual.h
-  src/bumper/display.cpp
-  src/bumper/visual.cpp
-  )
-
-add_dependencies(PairsRvizPlugins_Bumper
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
-
-target_link_libraries(PairsRvizPlugins_Bumper
-  ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
-  )
+## --------------------------------------------------------------
+## |                           Compile                          |
+## --------------------------------------------------------------
 
 ## SPHERE VIZUALIZATION
 
-add_library(PairsRvizPlugins_Sphere
-  include/sphere/display.h
-  include/sphere/visual.h
+add_library(PairsRvizPlugins_Sphere SHARED
   src/sphere/display.cpp
   src/sphere/visual.cpp
+  ${MOC_FILES}
   )
 
-add_dependencies(PairsRvizPlugins_Sphere
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
+target_include_directories(PairsRvizPlugins_Sphere PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
+ament_target_dependencies(PairsRvizPlugins_Sphere
+  pluginlib
+  rviz_common
+  rviz_ogre_vendor
+  pairs_msgs
+)
 
 target_link_libraries(PairsRvizPlugins_Sphere
   ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
   )
 
-## COVARIANCE
+## TEXTURED MESH DISPLAY
 
-add_library(PairsRvizPlugins_Covariance
-  include/covariance/property.h
-  include/covariance/visual.h
-  src/covariance/property.cpp
-  src/covariance/visual.cpp
-  )
-
-add_dependencies(PairsRvizPlugins_Covariance
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
-
-target_link_libraries(PairsRvizPlugins_Covariance
-  ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
-  )
-
-## SMART LINE
-
-add_library(PairsRvizPlugins_SmartLine
-  include/smart_line/smart_line.h
-  src/smart_line/smart_line.cpp
-  )
-
-add_dependencies(PairsRvizPlugins_SmartLine
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
-
-target_link_libraries(PairsRvizPlugins_SmartLine
-  ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
-  )
-
-## FAST ARROW
-
-add_library(PairsRvizPlugins_FastArrow
-  include/fast_arrow/fast_arrow.h
-  src/fast_arrow/fast_arrow.cpp
-  )
-
-add_dependencies(PairsRvizPlugins_FastArrow
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
-
-target_link_libraries(PairsRvizPlugins_FastArrow
-  ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
-  PairsRvizPlugins_SmartLine
-  )
-
-## POSE WITH COVARIANCE ARRAY
-
-add_library(PairsRvizPlugins_PoseWithCovarianceArray
-  include/pose_with_covariance_array/display.h
-  src/pose_with_covariance_array/display.cpp
-  )
-
-add_dependencies(PairsRvizPlugins_PoseWithCovarianceArray
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
-
-target_link_libraries(PairsRvizPlugins_PoseWithCovarianceArray
-  ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
-  PairsRvizPlugins_Covariance
-  PairsRvizPlugins_FastArrow
-  )
-
-## RVIZ NAV GOAL
-
-add_library(PairsRvizPlugins_NavGoal
-  src/rviz_interface/nav_goal.cpp
-  )
-
-target_link_libraries(PairsRvizPlugins_NavGoal
-  ${catkin_LIBRARIES}
-  )
-
-## RVIZ POSE ESTIMATE
-
-add_library(PairsRvizPlugins_PoseEstimate
-  src/rviz_interface/pose_estimate.cpp
-  )
-
-target_link_libraries(PairsRvizPlugins_PoseEstimate
-  ${catkin_LIBRARIES}
-  )
-
-## RVIZ TRACK ARRAY
-
-add_library(PairsRvizPlugins_TrackArray
-  include/track_array/display.h
-  src/track_array/display.cpp
-  )
-
-add_dependencies(PairsRvizPlugins_TrackArray
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
-
-target_link_libraries(PairsRvizPlugins_TrackArray
-  ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
-  )
-
-## NAMED GOAL TOOL
-
-add_library(PairsRvizPlugins_NamedGoalTool
-  include/named_goal_tool/named_goal_tool.h
-  src/named_goal_tool/named_goal_tool.cpp
-  )
-
-add_dependencies(PairsRvizPlugins_NamedGoalTool
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
-
-target_link_libraries(PairsRvizPlugins_NamedGoalTool
-  ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
-  )
-
-## ODOM ViZ
-
-add_library(PairsRvizPlugins_OdomViz
-  include/odom_viz/odom_viz.h
-  include/odom_viz/visual_entity.h
-  src/odom_viz/odom_viz.cpp
-  src/odom_viz/visual_entity.cpp
+add_library(PairsRvizPlugins_TexturedMeshDisplay SHARED
+  src/textured_mesh_display/textured_mesh_display.cpp
+  src/textured_mesh_display/textured_mesh_visual.cpp
+  src/textured_mesh_display/surface_normals_visual.cpp
+  ${MOC_FILES_TEXTURED_MESH}
 )
 
-add_dependencies(PairsRvizPlugins_OdomViz
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
+target_include_directories(PairsRvizPlugins_TexturedMeshDisplay PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${OpenCV_INCLUDE_DIRS}
 )
 
-target_link_libraries(PairsRvizPlugins_OdomViz
+ament_target_dependencies(PairsRvizPlugins_TexturedMeshDisplay
+  pluginlib
+  rviz_common
+  rviz_ogre_vendor
+  pairs_msgs
+  pcl_msgs
+  image_transport
+  cv_bridge
+  pcl_conversions
+  rclcpp
+  message_filters
+  sensor_msgs
+  std_msgs
+)
+
+target_link_libraries(PairsRvizPlugins_TexturedMeshDisplay
   ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
+  #${OGRE_LIBRARIES}           # Add this
+  ${OpenCV_LIBRARIES}         # Add this too since you use OpenCV
 )
 
-## WAYPOINT PLANNER
+## --------------------------------------------------------------
+## |                       export plugins                       |
+## --------------------------------------------------------------
 
-add_library(PairsRvizPlugins_WaypointPlanner
-  include/waypoint_planner/waypoint_planner.h
-  src/waypoint_planner/waypoint_planner.cpp
-)
-
-add_dependencies(PairsRvizPlugins_WaypointPlanner
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-)
-
-target_link_libraries(PairsRvizPlugins_WaypointPlanner
-  ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
-)
-
-## STATUS DISPLAY and CONTOL TOOL
-
-add_library(PairsRvizPlugins_Status
-  include/uav_status/status_display.h
-  include/uav_status/overlay_utils.h
-  include/control/im_server.h
-  include/control/control.h
-  include/control/drone_entity.h
-  include/control/overlay_picker_tool.h
-  src/control/im_server.cpp
-  src/control/control.cpp
-  src/control/drone_entity.cpp
-  src/control/overlay_picker_tool.cpp
-  src/uav_status/status_display.cpp
-  src/uav_status/overlay_utils.cpp
-  )
-
-add_dependencies(PairsRvizPlugins_Status
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  )
-
-target_link_libraries(PairsRvizPlugins_Status
-  ${QT_LIBRARIES}
-  ${catkin_LIBRARIES}
-  )
+# <package of the base class>, <relative path to the xml>
+pluginlib_export_plugin_description_file(rviz_common plugins.xml)
 
 ## --------------------------------------------------------------
 ## |                           Install                          |
 ## --------------------------------------------------------------
 
-install(TARGETS ${LIBRARIES}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+install(
+  TARGETS ${LIBRARIES}
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
   )
 
-install(DIRECTORY launch data icons
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+install(
+  DIRECTORY include
+  DESTINATION .
   )
 
-install(DIRECTORY scripts
-  USE_SOURCE_PERMISSIONS
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
   )
 
-install(DIRECTORY scripts/
-  USE_SOURCE_PERMISSIONS
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+install(FILES plugins.xml
+        DESTINATION share/${PROJECT_NAME}
+)
+
+ament_export_libraries(
+  ${LIBRARIES}
   )
 
-install(FILES plugins.xml nodelets.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+ament_export_include_directories(
+  include
   )
+
+ament_export_targets(
+  export_${PROJECT_NAME} HAS_LIBRARY_TARGET
+  )
+
+ament_export_dependencies(
+  ${DEPENDENCIES}
+  )
+
+ament_package()

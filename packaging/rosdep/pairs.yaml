@@ -1,29 +1,29 @@
-# Local rosdep rules for PAIRS packages not in the public rosdep index (ROS noetic).
+# Local rosdep rules for PAIRS packages not in the public rosdep index (ROS jazzy).
 pairs_msgs:
-  ubuntu: [ros-noetic-pairs-msgs]
+  ubuntu: [ros-jazzy-pairs-msgs]
 pairs_lib:
-  ubuntu: [ros-noetic-pairs-lib]
+  ubuntu: [ros-jazzy-pairs-lib]
 pairs_uav_hw_api:
-  ubuntu: [ros-noetic-pairs-uav-hw-api]
+  ubuntu: [ros-jazzy-pairs-uav-hw-api]
 pairs_uav_managers:
-  ubuntu: [ros-noetic-pairs-uav-managers]
+  ubuntu: [ros-jazzy-pairs-uav-managers]
 pairs_mpc_solvers:
-  ubuntu: [ros-noetic-pairs-mpc-solvers]
+  ubuntu: [ros-jazzy-pairs-mpc-solvers]
 pairs_uav_controllers:
-  ubuntu: [ros-noetic-pairs-uav-controllers]
+  ubuntu: [ros-jazzy-pairs-uav-controllers]
 pairs_uav_trackers:
-  ubuntu: [ros-noetic-pairs-uav-trackers]
+  ubuntu: [ros-jazzy-pairs-uav-trackers]
 pairs_uav_state_estimators:
-  ubuntu: [ros-noetic-pairs-uav-state-estimators]
+  ubuntu: [ros-jazzy-pairs-uav-state-estimators]
 pairs_uav_trajectory_generation:
-  ubuntu: [ros-noetic-pairs-uav-trajectory-generation]
+  ubuntu: [ros-jazzy-pairs-uav-trajectory-generation]
 pairs_uav_autostart:
-  ubuntu: [ros-noetic-pairs-uav-autostart]
+  ubuntu: [ros-jazzy-pairs-uav-autostart]
 pairs_uav_status:
-  ubuntu: [ros-noetic-pairs-uav-status]
+  ubuntu: [ros-jazzy-pairs-uav-status]
 pairs_uav_testing:
-  ubuntu: [ros-noetic-pairs-uav-testing]
+  ubuntu: [ros-jazzy-pairs-uav-testing]
 pairs_uav_gazebo_simulation:
-  ubuntu: [ros-noetic-pairs-uav-gazebo-simulation]
+  ubuntu: [ros-jazzy-pairs-uav-gazebo-simulation]
 nlopt:
   ubuntu: [libnlopt-cxx-dev]
