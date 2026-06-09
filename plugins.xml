@@ -1,0 +1,67 @@
+<library path="lib/libPairsRvizPlugins_Sphere">
+  <class name="pairs_rviz_plugins/Sphere" type="pairs_rviz_plugins::sphere::Display" base_class_type="rviz::Display">
+    <description>Display tool for visualizing pairs_msgs/Sphere messages.</description>
+    <message_type>pairs_msgs/Sphere</message_type>
+  </class>
+</library>
+
+<library path="lib/libPairsRvizPlugins_Bumper">
+  <class name="pairs_rviz_plugins/Bumper" type="pairs_rviz_plugins::bumper::Display" base_class_type="rviz::Display">
+    <description>Display tool for visualizing pairs_msgs/ObstacleSectors messages.</description>
+    <message_type>pairs_msgs/ObstacleSectors</message_type>
+  </class>
+</library>
+
+<library path="lib/libPairsRvizPlugins_PoseWithCovarianceArray">
+  <class name="pairs_rviz_plugins/PoseWithCovarianceArray" type="pairs_rviz_plugins::pose_with_covariance_array::Display" base_class_type="rviz::Display">
+    <description>Display tool for visualizing pairs_msgs/PoseWithCovarianceArrayStamped messages.</description>
+    <message_type>pairs_msgs/PoseWithCovarianceArrayStamped</message_type>
+  </class>
+</library>
+
+<library path="lib/libPairsRvizPlugins_TrackArray">
+  <class name="pairs_rviz_plugins/TrackArray" type="pairs_rviz_plugins::track_array::Display" base_class_type="rviz::Display">
+    <description>Display tool for visualizing pairs_msgs/TrackArrayStamped messages.</description>
+    <message_type>pairs_msgs/TrackArrayStamped</message_type>
+  </class>
+</library>
+
+<library path="lib/libPairsRvizPlugins_NamedGoalTool">
+  <class name="pairs_rviz_plugins/NamedSetGoal" type="pairs_rviz_plugins::NamedGoalTool" base_class_type="rviz::Tool">
+    <description>
+      Publish a goal pose for the robot. After one use, reverts to default tool.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libPairsRvizPlugins_OdomViz">
+  <class name="pairs_rviz_plugins/OdometryWithVelocity" type="pairs_rviz_plugins::OdomViz" base_class_type="rviz::Display">
+    <description>
+      Advanced nav_msgs/Odometry visualizer.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libPairsRvizPlugins_WaypointPlanner">
+  <class name="pairs_rviz_plugins/WaypointPlanner" type="pairs_rviz_plugins::WaypointPlanner" base_class_type="rviz::Tool">
+    <description>
+      Set sequence of navigation waypoints for a drone to fly through.
+    </description>
+  </class>
+</library>
+
+<library path="lib/libPairsRvizPlugins_Status">
+  <class name="pairs_rviz_plugins/ControlTool" type="pairs_rviz_plugins::ControlTool" base_class_type="rviz::Tool">
+    <description>
+      UAV control tool with pairs_uav_status functionality (including visualization).
+    </description>
+  </class>
+</library>
+
+<library path="lib/libPairsRvizPlugins_Status">
+  <class name="pairs_rviz_plugins/Status" type="pairs_rviz_plugins::StatusDisplay" base_class_type="rviz::Display">
+    <description>
+      RVIZ visualization copying the pairs_uav_status functionality.
+    </description>
+  </class>
+</library>
